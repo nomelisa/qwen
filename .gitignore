@@ -2,6 +2,10 @@
 # Dependencies
 node_modules/
 
+# Logs and temp files
+*.log
+*.tmp
+
 # Environment
 .env
 .env.local
@@ -9,10 +13,7 @@ node_modules/
 
 # Editors
 .vscode/
-
-# Logs and temp files
-*.log
-*.tmp
+.idea/
 
 # Python
 __pycache__/
@@ -33,5 +34,31 @@ nosetests.xml
 coverage.xml
 *.cover
 *.log
-.git/refs/replace/
+.git/modules/
+*.sublime-workspace
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre
+.pyre/
+
+# IDE
+.vs/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 ```

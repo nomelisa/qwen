@@ -12,6 +12,9 @@ on:
         required: false
         default: 'sentences.txt'
 
+permissions:
+  contents: write
+
 jobs:
   generate-sentence:
     runs-on: ubuntu-latest
