@@ -1,12 +1,14 @@
 name: Generate Random Sentence with Llama.cpp
 
 on:
+  schedule:
+    - cron: '0 2 * * *'
   workflow_dispatch:
     inputs:
       prompt:
         description: 'Prompt for sentence generation'
         required: false
-        default: 'Generate a random sentence:'
+        default: ''
       output_file:
         description: 'File to append the sentence to'
         required: false
@@ -49,9 +51,32 @@ jobs:
           python << 'EOF'
           from llama_cpp import Llama
           import os
+          import random
+          import datetime
 
           prompt = "${{ github.event.inputs.prompt }}"
           output_file = "${{ github.event.inputs.output_file }}"
+
+          # If prompt is empty (scheduled run), use a random topic
+          if not prompt or prompt.strip() == '':
+              topics = [
+                  "Write a short story about a brave explorer",
+                  "Describe a peaceful morning in the countryside",
+                  "Tell me about the wonders of the ocean",
+                  "Imagine a world where animals can talk",
+                  "Write about a magical forest",
+                  "Describe the beauty of a sunset over mountains",
+                  "Tell a tale of friendship and loyalty",
+                  "Write about discovering a hidden treasure",
+                  "Describe a bustling city street at night",
+                  "Imagine life on a distant planet",
+                  "Write about a wise old teacher",
+                  "Describe the feeling of flying through clouds",
+                  "Tell a story about a curious child",
+                  "Write about the changing seasons",
+                  "Describe a cozy cabin in winter"
+              ]
+              prompt = random.choice(topics)
 
           llm = Llama(
               model_path="models/Qwen3-0.6B-Q4_K_M.gguf",
@@ -72,7 +97,6 @@ jobs:
           sentence = output['choices'][0]['text'].strip()
           
           if not sentence:
-              import datetime
               sentence = f"The quick brown fox jumps over the lazy dog at {datetime.datetime.now().strftime('%H:%M:%S')}"
           
           print(f"Generated sentence: {sentence}")
