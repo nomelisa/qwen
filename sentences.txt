@@ -1,1 +1,2 @@
 I'm a random sentence generator. I can generate a random sentence with a specific topic, like a random sentence about a random topic. I can generate a sentence of a random length and a random word. Let me know the topic and the word you
+in the style of a children's story, with a magical creature that appears in the forest as a child, and the forest has a magical element that allows the child to have their imagination and creativity freely. Additionally, the story should have a magical item
