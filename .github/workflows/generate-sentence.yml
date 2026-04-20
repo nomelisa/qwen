@@ -1,0 +1,96 @@
+name: Generate Random Sentence with Llama.cpp
+
+on:
+  workflow_dispatch:
+    inputs:
+      prompt:
+        description: 'Prompt for sentence generation'
+        required: false
+        default: 'Generate a random sentence:'
+      output_file:
+        description: 'File to append the sentence to'
+        required: false
+        default: 'sentences.txt'
+
+permissions:
+  contents: write
+
+jobs:
+  generate-sentence:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Git user
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install llama-cpp-python (Pre-built binary)
+        run: |
+          pip install --upgrade pip
+          pip install llama-cpp-python --only-binary :all:
+
+      - name: Download Qwen3 0.6B model
+        run: |
+          mkdir -p models
+          curl -L "https://huggingface.co/unsloth/Qwen3-0.6B-GGUF/resolve/main/Qwen3-0.6B-Q4_K_M.gguf?download=true" -o models/Qwen3-0.6B-Q4_K_M.gguf
+
+      - name: Generate random sentence
+        id: generate
+        run: |
+          python << 'EOF'
+          from llama_cpp import Llama
+          import os
+
+          prompt = "${{ github.event.inputs.prompt }}"
+          output_file = "${{ github.event.inputs.output_file }}"
+
+          llm = Llama(
+              model_path="models/Qwen3-0.6B-Q4_K_M.gguf",
+              n_ctx=2048,
+              n_threads=2,
+              verbose=False
+          )
+
+          output = llm(
+              prompt,
+              max_tokens=50,
+              stop=["\n", "Q:", "A:"],
+              echo=False,
+              temperature=0.8,
+              top_p=0.9
+          )
+
+          sentence = output['choices'][0]['text'].strip()
+          
+          if not sentence:
+              import datetime
+              sentence = f"The quick brown fox jumps over the lazy dog at {datetime.datetime.now().strftime('%H:%M:%S')}"
+          
+          print(f"Generated sentence: {sentence}")
+          
+          with open(output_file, 'a') as f:
+              f.write(sentence + '\n')
+          
+          print(f"Contents of {output_file}:")
+          with open(output_file, 'r') as f:
+              print(f.read())
+          EOF
+
+      - name: Commit and push changes
+        run: |
+          OUTPUT_FILE="${{ github.event.inputs.output_file }}"
+          
+          git add "$OUTPUT_FILE"
+          git commit -m "Add generated sentence to $OUTPUT_FILE [skip ci]" || echo "No changes to commit"
+          git push origin HEAD
